@@ -85,70 +85,89 @@ class PluginTask extends AppShell {
  * @param string $plugin Name of the plugin in CamelCased format
  * @return boolean
  */
-	public function bake($plugin) {
+	public function bake($plugin, $skel = null, $skip = array('empty')) {
 		$pathOptions = App::path('plugins');
 		if (count($pathOptions) > 1) {
 			$this->findPath($pathOptions);
 		}
-		$this->hr();
-		$this->out(__d('cake_console', "<info>Plugin Name:</info> %s", $plugin));
-		$this->out(__d('cake_console', "<info>Plugin Directory:</info> %s", $this->path . $plugin));
-		$this->hr();
 
-		$looksGood = $this->in(__d('cake_console', 'Look okay?'), array('y', 'n', 'q'), 'y');
-
-		if (strtolower($looksGood) == 'y') {
-			$Folder = new Folder($this->path . $plugin);
-			$directories = array(
-				'Config' . DS . 'Schema',
-				'Model' . DS . 'Behavior',
-				'Model' . DS . 'Datasource',
-				'Console' . DS . 'Command' . DS . 'Task',
-				'Controller' . DS . 'Component',
-				'Lib',
-				'View' . DS . 'Helper',
-				'Test' . DS . 'Case' . DS . 'Controller' . DS . 'Component',
-				'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper',
-				'Test' . DS . 'Case' . DS . 'Model' . DS . 'Behavior',
-				'Test' . DS . 'Fixture',
-				'Vendor',
-				'webroot'
+		if (!$skel && !empty($this->params['skel'])) {
+			$skel = $this->params['skel'];
+		}
+		while (!$skel) {
+			$skel = $this->in(
+				__d('cake_console', "What is the path to the directory layout you wish to copy?"),
+				null,
+				CAKE . 'Console' . DS . 'Templates' . DS . 'skel'
 			);
-
-			foreach ($directories as $directory) {
-				$dirPath = $this->path . $plugin . DS . $directory;
-				$Folder->create($dirPath);
-				$File = new File($dirPath . DS . 'empty', true);
+			if (!$skel) {
+				$this->err(__d('cake_console', 'The directory path you supplied was empty. Please try again.'));
+			} else {
+				while (is_dir($skel) === false) {
+					$skel = $this->in(
+						__d('cake_console', 'Directory path does not exist please choose another:'),
+						null,
+						CAKE . 'Console' . DS . 'Templates' . DS . 'skel'
+					);
+				}
 			}
-
-			foreach ($Folder->messages() as $message) {
-				$this->out($message, 1, Shell::VERBOSE);
-			}
-
-			$errors = $Folder->errors();
-			if (!empty($errors)) {
-				return false;
-			}
-
-			$controllerFileName = $plugin . 'AppController.php';
-
-			$out = "<?php\n\n";
-			$out .= "class {$plugin}AppController extends AppController {\n\n";
-			$out .= "}\n\n";
-			$this->createFile($this->path . $plugin . DS . 'Controller' . DS . $controllerFileName, $out);
-
-			$modelFileName = $plugin . 'AppModel.php';
-
-			$out = "<?php\n\n";
-			$out .= "class {$plugin}AppModel extends AppModel {\n\n";
-			$out .= "}\n\n";
-			$this->createFile($this->path . $plugin . DS . 'Model' . DS . $modelFileName, $out);
-
-			$this->hr();
-			$this->out(__d('cake_console', '<success>Created:</success> %s in %s', $plugin, $this->path . $plugin), 2);
 		}
 
-		return true;
+		$path = $this->path . $plugin;
+
+		$this->hr();
+		$this->out(__d('cake_console', "<info>Plugin Name:</info> %s", $plugin));
+		$this->out(__d('cake_console', '<info>Skel Directory</info>: %s', $skel));
+		$this->out(__d('cake_console', '<info>Will be copied to</info>: %s', $path));
+		$this->hr();
+		$looksGood = $this->in(__d('cake_console', 'Look okay?'), array('y', 'n', 'q'), 'y');
+
+		switch (strtolower($looksGood)) {
+			case 'y':
+				$Folder = new Folder($skel);
+				if (!empty($this->params['empty'])) {
+					$skip = array();
+				}
+
+				if ($Folder->copy(array('to' => $path, 'skip' => $skip))) {
+					$this->hr();
+					$this->out(__d('cake_console', '<success>Created:</success> %s in %s', $plugin, $this->path));
+					$this->hr();
+				} else {
+					$this->err(__d('cake_console', "<error>Could not create</error> '%s' properly.", $plugin));
+					return false;
+				}
+
+				foreach ($Folder->messages() as $message) {
+					$this->out(String::wrap(' * ' . $message), 1, Shell::VERBOSE);
+				}
+
+				$controllerFileName = $plugin . 'AppController.php';
+
+				$out = "<?php\n\n";
+				$out .= "class {$plugin}AppController extends AppController {\n\n";
+				$out .= "}\n\n";
+				$this->createFile($path . DS . 'Controller' . DS . $controllerFileName, $out);
+
+				$modelFileName = $plugin . 'AppModel.php';
+
+				$out = "<?php\n\n";
+				$out .= "class {$plugin}AppModel extends AppModel {\n\n";
+				$out .= "}\n\n";
+				$this->createFile($path . DS . 'Model' . DS . $modelFileName, $out);
+
+				$this->hr();
+				$this->out(__d('cake_console', '<success>Created:</success> %s in %s', $plugin, $path), 2);
+				return true;
+			case 'n':
+				unset($this->args[0]);
+				$this->execute();
+				return false;
+			case 'q':
+				$this->out(__d('cake_console', '<error>Bake Aborted.</error>'));
+				return false;
+
+		}
 	}
 
 /**
