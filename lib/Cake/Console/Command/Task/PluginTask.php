@@ -98,7 +98,7 @@ class PluginTask extends AppShell {
 			$skel = $this->in(
 				__d('cake_console', "What is the path to the directory layout you wish to copy?"),
 				null,
-				CAKE . 'Console' . DS . 'Templates' . DS . 'skel'
+                    CAKE . 'Console' . DS . 'Templates' . DS . 'plugin'
 			);
 			if (!$skel) {
 				$this->err(__d('cake_console', 'The directory path you supplied was empty. Please try again.'));
