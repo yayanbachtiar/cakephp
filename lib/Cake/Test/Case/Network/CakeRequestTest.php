@@ -169,19 +169,6 @@ class CakeRequestTest extends CakeTestCase {
 		$request = new CakeRequest('some/path');
 		$this->assertEquals($_POST, $request->data);
 
-		$_POST = array(
-			'data' => array(
-				'Article' => array('title' => 'Testing'),
-			),
-			'action' => 'update'
-		);
-		$request = new CakeRequest('some/path');
-		$expected = array(
-			'Article' => array('title' => 'Testing'),
-			'action' => 'update'
-		);
-		$this->assertEquals($expected, $request->data);
-
 		$_POST = array('data' => array(
 			'Article' => array('title'),
 			'Tag' => array('Tag' => array(1, 2))
