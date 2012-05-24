@@ -1648,7 +1648,7 @@ class DispatcherTest extends CakeTestCase {
 		$dispatcher->parseParams($event);
 		$expected = array(
 			'pass' => array(), 'named' => array(), 'plugin' => null, 'controller' => 'posts', 'action' => 'add',
-			'[method]' => 'POST', 'data' => array('extra' => 'data', 'Post' => array('title' => 'New Post')),
+			'[method]' => 'POST', 'data' => array('extra' => 'data', 'data' => array('Post' => array('title' => 'New Post'))),
 		);
 		foreach ($expected as $key => $value) {
 			$this->assertEquals($value, $request[$key], 'Value mismatch for ' . $key . ' %s');
