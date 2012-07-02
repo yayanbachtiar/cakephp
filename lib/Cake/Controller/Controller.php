@@ -940,17 +940,7 @@ class Controller extends Object implements CakeEventListener {
 		}
 
 		$View = new $viewClass($this);
-
-		$models = ClassRegistry::keys();
-		foreach ($models as $currentModel) {
-			$currentObject = ClassRegistry::getObject($currentModel);
-			if (is_a($currentObject, 'Model')) {
-				$className = get_class($currentObject);
-				list($plugin) = pluginSplit(App::location($className));
-				$this->request->params['models'][$currentObject->alias] = compact('plugin', 'className');
-				$View->validationErrors[$currentObject->alias] =& $currentObject->validationErrors;
-			}
-		}
+		$View->validationErrors = $this->_validationErrors();
 
 		$this->autoRender = false;
 		$this->View = $View;
@@ -1223,6 +1213,32 @@ class Controller extends Object implements CakeEventListener {
  */
 	protected function _scaffoldError($method) {
 		return $this->scaffoldError($method);
+	}
+
+/**
+ * _validationErrors
+ *
+ * Get all validation errors for the current request
+ *
+ * @return array
+ */
+	protected function _validationErrors() {
+		$return = array();
+
+		$models = ClassRegistry::keys();
+		foreach ($models as $model) {
+			$object = ClassRegistry::getObject($model);
+			if (!is_a($object, 'Model')) {
+				continue;
+			}
+			$className = get_class($object);
+			if (array_key_exists($object->alias, $return)) {
+				continue;
+			}
+			list($plugin) = pluginSplit(App::location($className));
+			$return[$object->alias] =& $object->validationErrors;
+		}
+		return $return;
 	}
 
 }
