@@ -2077,8 +2077,7 @@ class FormHelper extends AppHelper {
 		$attributes = $this->_dateTimeSelected('day', $fieldName, $attributes);
 
 		if (strlen($attributes['value']) > 2) {
-			$Date = new DateTime($attributes['value']);
-			$attributes['value'] = $Date->format('d');
+			$attributes['value'] = date_create($attributes['value'])->format('d');
 		} elseif ($attributes['value'] === false) {
 			$attributes['value'] = null;
 		}
@@ -2124,8 +2123,7 @@ class FormHelper extends AppHelper {
 		}
 
 		if (strlen($attributes['value']) > 4 || $attributes['value'] === 'now') {
-			$Date = new DateTime($attributes['value']);
-			$attributes['value'] = $Date->format('Y');
+			$attributes['value'] = date_create($attributes['value'])->format('Y');
 		} elseif ($attributes['value'] === false) {
 			$attributes['value'] = null;
 		}
@@ -2161,8 +2159,7 @@ class FormHelper extends AppHelper {
 		$attributes = $this->_dateTimeSelected('month', $fieldName, $attributes);
 
 		if (strlen($attributes['value']) > 2) {
-			$Date = new DateTime($attributes['value']);
-			$attributes['value'] = $Date->format('m');
+			$attributes['value'] = date_create($attributes['value'])->format('m');
 		} elseif ($attributes['value'] === false) {
 			$attributes['value'] = null;
 		}
@@ -2238,8 +2235,7 @@ class FormHelper extends AppHelper {
 		$attributes = $this->_dateTimeSelected('min', $fieldName, $attributes);
 
 		if (strlen($attributes['value']) > 2) {
-			$Date = new DateTime($attributes['value']);
-			$attributes['value'] = $Date->format('i');
+			$attributes['value'] = date_create($attributes['value'])->format('i');
 		} elseif ($attributes['value'] === false) {
 			$attributes['value'] = null;
 		}
@@ -2306,8 +2302,7 @@ class FormHelper extends AppHelper {
 						$attributes['value'] = date('a');
 					}
 				} else {
-					$Date = new DateTime($attributes['value']);
-					$attributes['value'] = $Date->format('a');
+					$attributes['value'] = date_create($attributes['value'])->format('a');
 				}
 			}
 		}
